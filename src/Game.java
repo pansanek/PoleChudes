@@ -109,9 +109,6 @@ public class Game {
                 newScore = newScore * 2;
                 players[player].setScore(newScore);
                 break;
-            case 3:
-                System.out.println("Переход хода :(");
-                break;
         }
     }
     private void initializationOfPlayers(int number) {

@@ -4,7 +4,7 @@ public class Drum {
     private Random random = new Random();
 
     public int roll() {
-        return  random.nextInt(5);
+        return  random.nextInt(2);
 
     }
 
