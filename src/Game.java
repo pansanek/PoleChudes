@@ -2,6 +2,7 @@ import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
+import static java.lang.Character.toUpperCase;
 import static java.lang.System.exit;
 
 public class Game {
@@ -92,7 +93,27 @@ public class Game {
         System.out.println("Поздравляю " + players[winner].getName() + ", вы победили! Общее количество: " + players[winner].getScore());
         exit(1);
     }
-
+    private void readDrum(int numberOnDrum, int player) {
+        switch (numberOnDrum) {
+            case 0:
+                System.out.println("10 очков!");
+                players[player].increaseScore(10);
+                break;
+            case 1:
+                System.out.println("30 очков!");
+                players[player].increaseScore(30);
+                break;
+            case 2:
+                System.out.println("X2!!!");
+                int newScore = players[player].getScore();
+                newScore = newScore * 2;
+                players[player].setScore(newScore);
+                break;
+            case 3:
+                System.out.println("Переход хода :(");
+                break;
+        }
+    }
     private void initializationOfPlayers(int number) {
         players = new Player[number];
         Scanner scanner = new Scanner(System.in);
@@ -111,7 +132,14 @@ public class Game {
 
         }
     }
-
+    private void printTaskAndProgress() {
+        System.out.println("Вопрос: " + task);
+        System.out.print("Прогресс: ");
+        for (int i = 0; i < progress.length; i++) {
+            System.out.print(progress[i]);
+        }
+        System.out.println();
+    }
     private void initializationOfProgress(int size) {
         //Изначально прогресс отгадывания слова 0 и отображаются только *
         progress = new char[size];
@@ -119,5 +147,88 @@ public class Game {
             progress[i] = '*';
         }
 
+    }
+    private void playerStep(int player) {
+
+        System.out.println("Назовите слово или букву? Введите 1/2");
+        int answer = 0;
+
+        //Считываем вариант отгадывания слова
+        boolean correct = false;
+        while (correct == false) {
+            try {
+                answer = scanner.nextInt();
+
+                //Если ответ вне диапазона доступных
+                if (answer != 1 && answer != 2) {
+                    System.out.println("Нет такого варианта. Попробуйте еще раз");
+                    continue;
+                }
+                correct = true;
+            } catch (InputMismatchException e) {
+                System.out.println("Неправильный параметр. Попробуйте еще раз");
+                scanner.next();
+                continue;
+            }
+        }
+
+        if (answer == 1) {
+            enterWord(player);
+        } else if (answer == 2) {
+            enterLetter(player);
+        }
+    }
+
+    private void enterWord(int player) {
+        System.out.println("Введите слово: ");
+        String word = scanner.next();
+        if (word.equalsIgnoreCase(answer)) {
+            winner = player;
+            endGame = true;
+        } else {
+            System.out.println("Неправильно!");
+            System.out.println();
+        }
+    }
+
+    private void enterLetter(int player) {
+        System.out.println("Введите букву: ");
+        Character letter = scanner.next().charAt(0);
+        int totalEntries = 0;
+
+        //Проверяем наличие введенной буква в нашем слове
+        for (int i = 0; i < answer.length(); i++) {
+            if (answer.charAt(i) == letter || answer.charAt(i) == toUpperCase(letter)) {
+                totalEntries++;
+                progress[i] = letter;
+            }
+        }
+
+        //Если ни одного совпадения - передаем ход следующему игроку
+        //Иначе смотрим сколько закрытых букв осталось
+        if (totalEntries == 0) {
+            System.out.println("Неправильно!");
+            System.out.println();
+            return;
+        } else {
+            System.out.println("Правильно!");
+            printTaskAndProgress();
+            int totalStars = 0;
+
+            //Проверяем сколько букв осталось закрыто
+            for (int i = 0; i < progress.length; i++) {
+                if (progress[i] == '*') {
+                    totalStars++;
+                }
+            }
+
+            //Если все буквы открыты то победа
+            if (totalStars == 0) {
+                winner = player;
+                endGame = true;
+            } else {
+                playerStep(player);
+            }
+        }
     }
 }
